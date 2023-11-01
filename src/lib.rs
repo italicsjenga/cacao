@@ -172,6 +172,9 @@ pub mod switch;
 #[cfg(feature = "appkit")]
 pub mod select;
 
+#[cfg(feature = "appkit")]
+pub mod stepper;
+
 pub mod text;
 
 #[cfg(feature = "quicklook")]
