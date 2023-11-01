@@ -20,7 +20,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
 bitmask-enum = "2.2.1"
-objc = { version = "=0.3.0-beta.2", package = "objc2" }
+objc = { version = "=0.3.0-beta.3", package = "objc2" }
 block = { version = "=0.2.0-alpha.6", package = "block2" }
 # Temporary: Patched versions that implement `Encode` for common types
 # Branch: `objc2`
