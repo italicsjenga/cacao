@@ -1,5 +1,6 @@
 //! Implements a number stepper. By default this uses NSStepper on macOS.
 
+use core_graphics::base::CGFloat;
 use core_graphics::geometry::CGRect;
 use objc::rc::{Id, Shared};
 use objc::runtime::{Class, Object};
@@ -156,9 +157,18 @@ impl Stepper {
         });
     }
 
-    /// Gets the selected index.
-    pub fn get_selected_value(&self) -> f32 {
-        self.objc.get(|obj| unsafe { msg_send![obj, floatValue] })
+    /// Sets the selected value.
+    pub fn set_value(&self, value: f64) {
+        let value = value as CGFloat;
+
+        self.objc.with_mut(|obj| unsafe {
+            let _: () = msg_send![obj, setDoubleValue: value];
+        });
+    }
+
+    /// Gets the selected value.
+    pub fn get_value(&self) -> f64 {
+        self.objc.get(|obj| unsafe { msg_send![obj, doubleValue] })
     }
 }
 
