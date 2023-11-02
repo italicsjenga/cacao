@@ -415,6 +415,16 @@ impl<T> TextField<T> {
             let _: () = msg_send![obj, setFont:&*font];
         });
     }
+
+    /// Enable/disable this field.
+    pub fn set_enabled(&self, enabled: bool) {
+        self.objc.with_mut(|obj| unsafe {
+            let _: () = msg_send![obj, setEnabled:match enabled {
+                true => YES,
+                false => NO,
+            }];
+        });
+    }
 }
 
 impl<T> ObjcAccess for TextField<T> {
