@@ -140,7 +140,7 @@ pub struct TextField<T = ()> {
 
     /// A pointer to the Objective-C runtime center Y layout constraint.
     #[cfg(feature = "autolayout")]
-    pub center_y: LayoutAnchorY
+    pub center_y: LayoutAnchorY,
 }
 
 impl Default for TextField {
@@ -187,14 +187,14 @@ impl TextField {
             center_x: LayoutAnchorX::center(view),
 
             #[cfg(feature = "autolayout")]
-            center_y: LayoutAnchorY::center(view)
+            center_y: LayoutAnchorY::center(view),
         }
     }
 }
 
 impl<T> TextField<T>
 where
-    T: TextFieldDelegate + 'static
+    T: TextFieldDelegate + 'static,
 {
     /// Initializes a new TextField with a given `TextFieldDelegate`. This enables you to respond to events
     /// and customize the view as a module, similar to class-based systems.
@@ -242,7 +242,7 @@ where
             center_x: LayoutAnchorX::center(input),
 
             #[cfg(feature = "autolayout")]
-            center_y: LayoutAnchorY::center(input)
+            center_y: LayoutAnchorY::center(input),
         };
 
         (&mut delegate).did_load(input.clone_as_handle());
@@ -289,7 +289,7 @@ impl<T> TextField<T> {
             center_x: self.center_x.clone(),
 
             #[cfg(feature = "autolayout")]
-            center_y: self.center_y.clone()
+            center_y: self.center_y.clone(),
         }
     }
 
@@ -354,6 +354,35 @@ impl<T> TextField<T> {
         self.objc.with_mut(|obj| unsafe {
             let cell: id = msg_send![obj, cell];
             let _: () = msg_send![cell, setUsesSingleLineMode:match uses_single_line {
+                true => YES,
+                false => NO
+            }];
+        });
+    }
+
+    /// Set whether this field should truncate the last visible line.
+    pub fn set_truncates_last_visible_line(&self, truncates_last_visible_line: bool) {
+        self.objc.with_mut(|obj| unsafe {
+            let cell: id = msg_send![obj, cell];
+            let _: () = msg_send![cell, setTruncatesLastVisibleLine:match truncates_last_visible_line {
+                true => YES,
+                false => NO
+            }];
+        });
+    }
+
+    /// Sets the line break mode.
+    pub fn set_line_break_mode(&self, mode: crate::text::LineBreakMode) {
+        self.objc.with_mut(|obj| unsafe {
+            let _: () = msg_send![obj, setLineBreakMode:mode as crate::foundation::NSUInteger];
+        });
+    }
+
+    /// Set whether this field is editable.
+    pub fn set_editable(&self, editable: bool) {
+        self.objc.with_mut(|obj| unsafe {
+            let cell: id = msg_send![obj, cell];
+            let _: () = msg_send![cell, setEditable:match editable {
                 true => YES,
                 false => NO
             }];
