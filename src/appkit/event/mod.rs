@@ -48,7 +48,7 @@ pub enum EventMask {
     Pressure = 1 << 34,
     DirectTouch = 1 << 37,
 
-    ChangeMode = 1 << 38
+    ChangeMode = 1 << 38,
 }
 
 /// A wrapper over an `NSEvent`.
@@ -103,18 +103,22 @@ impl Event {
         unsafe { msg_send![&*self.0, clickCount] }
     }
 
-    /*pub fn contains_modifier_flags(&self, flags: &[EventModifierFlag]) -> bool {
-        let modifier_flags: NSUInteger = unsafe {
-            msg_send![&*self.0, modifierFlags]
-        };
+    pub fn current_modifier_flags(&self) -> Vec<EventModifierFlag> {
+        let pressed_modifier_flags: NSUInteger = unsafe { msg_send![&*self.0, modifierFlags] };
 
-        for flag in flags {
-            let f: NSUInteger = flag.into();
+        let all_modifier_flags = vec![
+            EventModifierFlag::CapsLock,
+            EventModifierFlag::Control,
+            EventModifierFlag::Option,
+            EventModifierFlag::Command,
+            EventModifierFlag::DeviceIndependentFlagsMask,
+        ];
 
-        }
-
-        false
-    }*/
+        all_modifier_flags
+            .into_iter()
+            .filter(|modifier| (Into::<NSUInteger>::into(modifier) & pressed_modifier_flags) != 0)
+            .collect()
+    }
 
     /// Register an event handler with the local system event stream. This method
     /// watches for events that occur _within the application_. Events outside
@@ -124,14 +128,14 @@ impl Event {
     /// monitors are required - the streams don't mix.
     pub fn local_monitor<F>(mask: EventMask, handler: F) -> EventMonitor
     where
-        F: Fn(Event) -> Option<Event> + Send + Sync + 'static
+        F: Fn(Event) -> Option<Event> + Send + Sync + 'static,
     {
         let block = ConcreteBlock::new(move |event: id| {
             let evt = Event::new(event);
 
             match handler(evt) {
                 Some(mut evt) => &mut *evt.0,
-                None => nil
+                None => nil,
             }
         });
         let block = block.copy();
@@ -153,14 +157,14 @@ impl Event {
     /// monitors are required - the streams don't mix.
     pub fn global_monitor<F>(mask: EventMask, handler: F) -> EventMonitor
     where
-        F: Fn(Event) -> Option<Event> + Send + Sync + 'static
+        F: Fn(Event) -> Option<Event> + Send + Sync + 'static,
     {
         let block = ConcreteBlock::new(move |event: id| {
             let evt = Event::new(event);
 
             match handler(evt) {
                 Some(mut evt) => &mut *evt.0,
-                None => nil
+                None => nil,
             }
         });
         let block = block.copy();
@@ -183,7 +187,7 @@ pub enum EventModifierFlag {
     Control,
     Option,
     Command,
-    DeviceIndependentFlagsMask
+    DeviceIndependentFlagsMask,
 }
 
 impl From<EventModifierFlag> for NSUInteger {
@@ -193,7 +197,7 @@ impl From<EventModifierFlag> for NSUInteger {
             EventModifierFlag::Control => 1 << 18,
             EventModifierFlag::Option => 1 << 19,
             EventModifierFlag::Command => 1 << 20,
-            EventModifierFlag::DeviceIndependentFlagsMask => 0xffff0000
+            EventModifierFlag::DeviceIndependentFlagsMask => 0xffff0000,
         }
     }
 }
@@ -205,7 +209,7 @@ impl From<&EventModifierFlag> for NSUInteger {
             EventModifierFlag::Control => 1 << 18,
             EventModifierFlag::Option => 1 << 19,
             EventModifierFlag::Command => 1 << 20,
-            EventModifierFlag::DeviceIndependentFlagsMask => 0xffff0000
+            EventModifierFlag::DeviceIndependentFlagsMask => 0xffff0000,
         }
     }
 }
