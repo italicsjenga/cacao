@@ -218,6 +218,12 @@ impl Image {
     /// ever exposes a compatible API, this can be tweaked in a PR.
     #[cfg(any(target_os = "macos", target_os = "ios"))]
     pub fn symbol(symbol: SFSymbol, accessibility_description: &str) -> Self {
+        Self::custom_symbol(symbol.to_str(), accessibility_description)
+    }
+
+    /// Creates and returns an Image with an arbitrary `SFSymbol`
+    pub fn custom_symbol(symbol: &str, accessibility_description: &str) -> Self {
+        println!("custom symbol name: {symbol}");
         // SFSymbols is macOS 11.0+
         #[cfg(feature = "appkit")]
         let min_version = 11;
@@ -229,7 +235,7 @@ impl Image {
         Image(unsafe {
             match os::is_minimum_version(min_version) {
                 true => {
-                    let icon = NSString::new(symbol.to_str());
+                    let icon = NSString::new(symbol);
                     let desc = NSString::new(accessibility_description);
                     msg_send_id![
                         Self::class(),
